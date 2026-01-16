@@ -241,6 +241,42 @@ Public Sub test()
 NextNightKey:
     Next nightKey
 
-    ' Krok 19: zapisujemy wyniki do nowej kolumny w arkuszu.
+    ' Krok 19: uzupełniamy "W toku" pomiędzy Start i Koniec dla tego samego operatora.
+    Dim startRows As Object
+    Dim endRows As Object
+    Dim startLookup As Variant
+    Dim endLookup As Variant
+
+    Set startRows = CreateObject("Scripting.Dictionary")
+    Set endRows = CreateObject("Scripting.Dictionary")
+
+    For rowIndex = headerRow + 1 To lastRow
+        operatorValue = Trim(CStr(dataArr(rowIndex, 4)))
+        If operatorValue <> "" Then
+            If outputArr(rowIndex, 1) = "Start" Then
+                startRows(operatorValue) = rowIndex
+            ElseIf outputArr(rowIndex, 1) = "Koniec" Then
+                endRows(operatorValue) = rowIndex
+            End If
+        End If
+    Next rowIndex
+
+    For Each startLookup In startRows.Keys
+        If endRows.Exists(startLookup) Then
+            startRow = startRows(startLookup)
+            lastRowWindow = endRows(startLookup)
+            If lastRowWindow > startRow Then
+                For rowIndex = startRow + 1 To lastRowWindow - 1
+                    If Trim(CStr(dataArr(rowIndex, 4))) = startLookup Then
+                        If outputArr(rowIndex, 1) = "" Then
+                            outputArr(rowIndex, 1) = "W toku"
+                        End If
+                    End If
+                Next rowIndex
+            End If
+        End If
+    Next startLookup
+
+    ' Krok 20: zapisujemy wyniki do nowej kolumny w arkuszu.
     ws.Cells(headerRow, col).Resize(lastRow, 1).Value = outputArr
 End Sub
