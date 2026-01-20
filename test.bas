@@ -24,6 +24,7 @@ Public Sub test()
     Dim previousOperator As String
     Dim nightInfo As Object
     Dim nightKey As Variant
+    Dim infoArrNight As Variant
     Dim dateOnly As Double
     Dim timeOnly As Double
     Dim startDate As Double
@@ -169,30 +170,30 @@ Public Sub test()
             If Not nightInfo.Exists(operatorValue) Then
                 ' [0]=state (0-brak startu,1-ma start), [1]=startDate, [2]=startRow, [3]=lastRowWindow,
                 ' [4]=earliestTime, [5]=earliestRow
-                infoArr = Array(0, 0#, 0, 0, timeOnly, rowIndex)
-                nightInfo.Add operatorValue, infoArr
+                infoArrNight = Array(0, 0#, 0, 0, timeOnly, rowIndex)
+                nightInfo.Add operatorValue, infoArrNight
             Else
-                infoArr = nightInfo(operatorValue)
-                If timeOnly < infoArr(4) Then
-                    infoArr(4) = timeOnly
-                    infoArr(5) = rowIndex
+                infoArrNight = nightInfo(operatorValue)
+                If timeOnly < infoArrNight(4) Then
+                    infoArrNight(4) = timeOnly
+                    infoArrNight(5) = rowIndex
                 End If
             End If
 
-            If infoArr(0) = 0 Then
+            If infoArrNight(0) = 0 Then
                 ' Start nocnej zmiany: pierwszy log po 16:00 w danym dniu.
                 If timeOnly >= (16# / 24#) Then
-                    infoArr(0) = 1
-                    infoArr(1) = dateOnly
-                    infoArr(2) = rowIndex
-                    infoArr(3) = 0
-                    nightInfo(operatorValue) = infoArr
+                    infoArrNight(0) = 1
+                    infoArrNight(1) = dateOnly
+                    infoArrNight(2) = rowIndex
+                    infoArrNight(3) = 0
+                    nightInfo(operatorValue) = infoArrNight
                 End If
             Else
-                startDate = infoArr(1)
+                startDate = infoArrNight(1)
                 If dateOnly = startDate + 1 And timeOnly <= (8# / 24#) Then
-                    infoArr(3) = rowIndex
-                    nightInfo(operatorValue) = infoArr
+                    infoArrNight(3) = rowIndex
+                    nightInfo(operatorValue) = infoArrNight
                 End If
             End If
         End If
@@ -200,12 +201,12 @@ Public Sub test()
 
     ' Krok 18.2: zapisujemy Start/Koniec dla operatorów spełniających regułę nocną.
     For Each nightKey In nightInfo.Keys
-        infoArr = nightInfo(nightKey)
-        startDate = infoArr(1)
-        startRow = infoArr(2)
-        lastRowWindow = infoArr(3)
-        earliestTime = infoArr(4)
-        earliestRow = infoArr(5)
+        infoArrNight = nightInfo(nightKey)
+        startDate = infoArrNight(1)
+        startRow = infoArrNight(2)
+        lastRowWindow = infoArrNight(3)
+        earliestTime = infoArrNight(4)
+        earliestRow = infoArrNight(5)
 
         If lastRowWindow <> 0 And startRow <> 0 Then
             Dim hasKoniec As Boolean
@@ -255,7 +256,7 @@ NextNightKey:
     Dim dictStart As Object
     Dim dictDates As Object
     Dim dictInfo As Object
-    Dim infoArr As Variant
+    Dim infoArrDobowa As Variant
     Dim minDate As Double
     Dim dateKey As String
     Dim startKey As String
@@ -361,20 +362,20 @@ NextNightKey:
                     dictStart.Add startKey, True
                     dictInfo.Add startKey, Array(sesjaDobowa, t, False)
                 Else
-                    infoArr = dictInfo(startKey)
-                    sesjaDobowa = CStr(infoArr(0))
-                    lastTime = CDbl(infoArr(1))
-                    switchedNB = CBool(infoArr(2))
+                    infoArrDobowa = dictInfo(startKey)
+                    sesjaDobowa = CStr(infoArrDobowa(0))
+                    lastTime = CDbl(infoArrDobowa(1))
+                    switchedNB = CBool(infoArrDobowa(2))
 
                     If Not switchedNB And (t - lastTime) > (8# / 24#) Then
                         sesjaDobowa = "N-B"
                         switchedNB = True
                     End If
 
-                    infoArr(0) = sesjaDobowa
-                    infoArr(1) = t
-                    infoArr(2) = switchedNB
-                    dictInfo(startKey) = infoArr
+                    infoArrDobowa(0) = sesjaDobowa
+                    infoArrDobowa(1) = t
+                    infoArrDobowa(2) = switchedNB
+                    dictInfo(startKey) = infoArrDobowa
                 End If
                 arrDobowa(rowIndex, 1) = sesjaDobowa
             End If
