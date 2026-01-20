@@ -361,8 +361,13 @@ NextNightKey:
                     If CStr(dataArr(rowIndex - 1, 11)) = "S+" And _
                        Trim$(CStr(dataArr(rowIndex - 1, 4))) = operatorValue And _
                        prevDateOnly = dateOnly Then
-                        arrDobowa(rowIndex, 1) = "N-B"
-                        GoTo NextDobowaRow
+                        If dictInfo.Exists(startKey) Then
+                            infoArrDobowa = dictInfo(startKey)
+                            If CStr(infoArrDobowa(0)) = "N-B" Then
+                                arrDobowa(rowIndex, 1) = "N-B"
+                                GoTo NextDobowaRow
+                            End If
+                        End If
                     End If
                 End If
                 arrDobowa(rowIndex, 1) = ""
