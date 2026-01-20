@@ -24,7 +24,6 @@ Public Sub test()
     Dim previousOperator As String
     Dim nightInfo As Object
     Dim nightKey As Variant
-    Dim infoArr As Variant
     Dim dateOnly As Double
     Dim timeOnly As Double
     Dim startDate As Double
