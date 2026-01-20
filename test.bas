@@ -348,6 +348,15 @@ NextNightKey:
         startKey = CStr(dateOnly) & "|" & operatorValue
         If operatorValue <> "" And dateOnly <> 0# And dateOnly = minDate Then
             If CStr(dataArr(rowIndex, 11)) = "S+" Then
+                If rowIndex > headerRow + 1 Then
+                    If CStr(dataArr(rowIndex - 1, 11)) = "S+" And _
+                       Trim$(CStr(dataArr(rowIndex - 1, 4))) = operatorValue And _
+                       ((IsNumeric(dataArr(rowIndex - 1, 1)) And Int(CDbl(dataArr(rowIndex - 1, 1))) = dateOnly) Or _
+                        (IsDate(dataArr(rowIndex - 1, 1)) And Int(CDbl(CDate(dataArr(rowIndex - 1, 1)))) = dateOnly)) Then
+                        arrDobowa(rowIndex, 1) = "N-B"
+                        GoTo NextDobowaRow
+                    End If
+                End If
                 arrDobowa(rowIndex, 1) = ""
                 GoTo NextDobowaRow
             End If
