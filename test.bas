@@ -292,8 +292,8 @@ NextNightKey:
     colDobowaL = Split(ws.Cells(headerRow, colDobowa).Address(False, False), CStr(headerRow))(0)
 
     minR = TimeSerial(4, 0, 0)
-    maxR = TimeSerial(10, 0, 0)
-    minP = TimeSerial(10, 0, 0)
+    maxR = TimeSerial(9, 0, 0)
+    minP = TimeSerial(9, 0, 0)
     maxP = TimeSerial(16, 0, 0)
     maxNA = TimeSerial(4, 0, 0)
     minNB = TimeSerial(16, 0, 0)
