@@ -253,6 +253,8 @@ NextNightKey:
     Dim minP As Double, maxP As Double
     Dim maxNA As Double, minNB As Double
     Dim sesjaDobowa As String
+    Dim dictStart As Object
+    Dim startKey As String
 
     Set startRows = CreateObject("Scripting.Dictionary")
     Set endRows = CreateObject("Scripting.Dictionary")
@@ -293,32 +295,44 @@ NextNightKey:
     maxR = TimeSerial(10, 0, 0)
     minP = TimeSerial(10, 0, 0)
     maxP = TimeSerial(16, 0, 0)
-    maxNA = TimeSerial(8, 0, 0)
-    minNB = TimeSerial(16, 0, 1)
+    maxNA = TimeSerial(4, 0, 0)
+    minNB = TimeSerial(16, 0, 0)
 
     ReDim arrDobowa(1 To lastRow, 1 To 1)
     arrDobowa(1, 1) = "SesjaDobowaZakres"
 
+    Set dictStart = CreateObject("Scripting.Dictionary")
+
     For rowIndex = headerRow + 1 To lastRow
         sesjaDobowa = ""
-        If IsNumeric(dataArr(rowIndex, 2)) Then
-            t = CDbl(dataArr(rowIndex, 2))
-            If t >= minR And t < maxR Then
-                sesjaDobowa = "R"
-            ElseIf t >= minP And t <= maxP Then
-                sesjaDobowa = "P"
-            Else
-                sesjaDobowa = "N"
-            End If
+        operatorValue = Trim$(CStr(dataArr(rowIndex, 4)))
+        dateValue = dataArr(rowIndex, 1)
+        dateOnly = 0#
+        If IsNumeric(dateValue) Then
+            dateOnly = Int(CDbl(dateValue))
+        ElseIf IsDate(dateValue) Then
+            dateOnly = Int(CDbl(CDate(dateValue)))
+        End If
 
-            If sesjaDobowa = "N" Then
-                If t <= maxNA Then
-                    sesjaDobowa = "N-A"
-                ElseIf t >= minNB Then
-                    sesjaDobowa = "N-B"
+        startKey = CStr(dateOnly) & "|" & operatorValue
+        If operatorValue <> "" And dateOnly <> 0# Then
+            If Not dictStart.Exists(startKey) Then
+                If IsNumeric(dataArr(rowIndex, 2)) Then
+                    t = CDbl(dataArr(rowIndex, 2))
+                    If t <= maxNA Then
+                        sesjaDobowa = "N-A"
+                    ElseIf t > minR And t <= maxR Then
+                        sesjaDobowa = "R"
+                    ElseIf t > minP And t <= maxP Then
+                        sesjaDobowa = "P"
+                    Else
+                        sesjaDobowa = "N-B"
+                    End If
+                    dictStart.Add startKey, True
                 End If
             End If
         End If
+
         arrDobowa(rowIndex, 1) = sesjaDobowa
     Next rowIndex
 
