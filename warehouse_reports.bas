@@ -926,6 +926,30 @@ Next rKORB
 wsKORB.Range("I1:I" & lastRow2KORB).Value = arrIKORB
 wsKORB.Range("J1:J" & lastRow2KORB).Value = arrJKORB
 
+'=========================================================
+' BLOK 4 (KORB): korekta daty dla wiersza S+ o czasie 00:00:00
+'   - jeśli w kolumnie K = "S+" i czas w kolumnie B = 0
+'   - ustaw datę z kolumny A na datę z następnego wiersza
+'=========================================================
+Dim arrAKORB2 As Variant, arrBKORB2 As Variant, arrKKORB2 As Variant
+Dim rKORBX As Long
+
+arrAKORB2 = wsKORB.Range("A1:A" & lastRow2KORB).Value
+arrBKORB2 = wsKORB.Range("B1:B" & lastRow2KORB).Value
+arrKKORB2 = wsKORB.Range("K1:K" & lastRow2KORB).Value
+
+For rKORBX = 1 To lastRow2KORB - 1
+    If CStr(arrKKORB2(rKORBX, 1)) = "S+" Then
+        If IsNumeric(arrBKORB2(rKORBX, 1)) Then
+            If CDbl(arrBKORB2(rKORBX, 1)) = 0# Then
+                arrAKORB2(rKORBX, 1) = arrAKORB2(rKORBX + 1, 1)
+            End If
+        End If
+    End If
+Next rKORBX
+
+wsKORB.Range("A1:A" & lastRow2KORB).Value = arrAKORB2
+
 EndKORB:
 
 
