@@ -246,6 +246,13 @@ NextNightKey:
     Dim endRows As Object
     Dim startLookup As Variant
     Dim endLookup As Variant
+    Dim colDobowa As Long
+    Dim colDobowaL As String
+    Dim arrDobowa() As Variant
+    Dim minR As Double, maxR As Double
+    Dim minP As Double, maxP As Double
+    Dim maxNA As Double, minNB As Double
+    Dim sesjaDobowa As String
 
     Set startRows = CreateObject("Scripting.Dictionary")
     Set endRows = CreateObject("Scripting.Dictionary")
@@ -277,6 +284,45 @@ NextNightKey:
         End If
     Next startLookup
 
-    ' Krok 20: zapisujemy wyniki do nowej kolumny w arkuszu.
+    ' Krok 20: dodajemy kolumnę SesjaDobowaZakres według czasu w kolumnie Godzina.
+    colDobowa = col + 1
+    ws.Cells(headerRow, colDobowa).Value = "SesjaDobowaZakres"
+    colDobowaL = Split(ws.Cells(headerRow, colDobowa).Address(False, False), CStr(headerRow))(0)
+
+    minR = TimeSerial(4, 0, 0)
+    maxR = TimeSerial(10, 0, 0)
+    minP = TimeSerial(10, 0, 0)
+    maxP = TimeSerial(16, 0, 0)
+    maxNA = TimeSerial(8, 0, 0)
+    minNB = TimeSerial(16, 0, 1)
+
+    ReDim arrDobowa(1 To lastRow, 1 To 1)
+    arrDobowa(1, 1) = "SesjaDobowaZakres"
+
+    For rowIndex = headerRow + 1 To lastRow
+        sesjaDobowa = ""
+        If IsNumeric(dataArr(rowIndex, 2)) Then
+            t = CDbl(dataArr(rowIndex, 2))
+            If t >= minR And t < maxR Then
+                sesjaDobowa = "R"
+            ElseIf t >= minP And t <= maxP Then
+                sesjaDobowa = "P"
+            Else
+                sesjaDobowa = "N"
+            End If
+
+            If sesjaDobowa = "N" Then
+                If t <= maxNA Then
+                    sesjaDobowa = "N-A"
+                ElseIf t >= minNB Then
+                    sesjaDobowa = "N-B"
+                End If
+            End If
+        End If
+        arrDobowa(rowIndex, 1) = sesjaDobowa
+    Next rowIndex
+
+    ' Krok 21: zapisujemy wyniki do nowych kolumn w arkuszu.
     ws.Cells(headerRow, col).Resize(lastRow, 1).Value = outputArr
+    ws.Cells(headerRow, colDobowa).Resize(lastRow, 1).Value = arrDobowa
 End Sub
