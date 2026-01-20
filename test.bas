@@ -347,6 +347,10 @@ NextNightKey:
 
         startKey = CStr(dateOnly) & "|" & operatorValue
         If operatorValue <> "" And dateOnly <> 0# And dateOnly = minDate Then
+            If CStr(dataArr(rowIndex, 11)) = "S+" Then
+                arrDobowa(rowIndex, 1) = ""
+                GoTo NextDobowaRow
+            End If
             If IsNumeric(dataArr(rowIndex, 2)) Then
                 t = CDbl(dataArr(rowIndex, 2))
                 If Not dictStart.Exists(startKey) Then
@@ -380,6 +384,7 @@ NextNightKey:
                 arrDobowa(rowIndex, 1) = sesjaDobowa
             End If
         End If
+NextDobowaRow:
     Next rowIndex
 
     ' Krok 21: zapisujemy wyniki do nowych kolumn w arkuszu.
