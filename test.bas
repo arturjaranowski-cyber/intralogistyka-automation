@@ -262,6 +262,8 @@ NextNightKey:
     Dim startKey As String
     Dim lastTime As Double
     Dim switchedNB As Boolean
+    Dim prevDateOnly As Double
+    Dim prevDateValue As Variant
 
     Set startRows = CreateObject("Scripting.Dictionary")
     Set endRows = CreateObject("Scripting.Dictionary")
@@ -349,10 +351,16 @@ NextNightKey:
         If operatorValue <> "" And dateOnly <> 0# And dateOnly = minDate Then
             If CStr(dataArr(rowIndex, 11)) = "S+" Then
                 If rowIndex > headerRow + 1 Then
+                    prevDateOnly = 0#
+                    prevDateValue = dataArr(rowIndex - 1, 1)
+                    If IsNumeric(prevDateValue) Then
+                        prevDateOnly = Int(CDbl(prevDateValue))
+                    ElseIf IsDate(prevDateValue) Then
+                        prevDateOnly = Int(CDbl(CDate(prevDateValue)))
+                    End If
                     If CStr(dataArr(rowIndex - 1, 11)) = "S+" And _
                        Trim$(CStr(dataArr(rowIndex - 1, 4))) = operatorValue And _
-                       ((IsNumeric(dataArr(rowIndex - 1, 1)) And Int(CDbl(dataArr(rowIndex - 1, 1))) = dateOnly) Or _
-                        (IsDate(dataArr(rowIndex - 1, 1)) And Int(CDbl(CDate(dataArr(rowIndex - 1, 1)))) = dateOnly)) Then
+                       prevDateOnly = dateOnly Then
                         arrDobowa(rowIndex, 1) = "N-B"
                         GoTo NextDobowaRow
                     End If
