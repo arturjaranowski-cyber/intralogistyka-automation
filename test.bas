@@ -254,7 +254,14 @@ NextNightKey:
     Dim maxNA As Double, minNB As Double
     Dim sesjaDobowa As String
     Dim dictStart As Object
+    Dim dictDates As Object
+    Dim dictInfo As Object
+    Dim infoArr As Variant
+    Dim minDate As Double
+    Dim dateKey As String
     Dim startKey As String
+    Dim lastTime As Double
+    Dim switchedNB As Boolean
 
     Set startRows = CreateObject("Scripting.Dictionary")
     Set endRows = CreateObject("Scripting.Dictionary")
@@ -301,7 +308,31 @@ NextNightKey:
     ReDim arrDobowa(1 To lastRow, 1 To 1)
     arrDobowa(1, 1) = "SesjaDobowaZakres"
 
+    Set dictDates = CreateObject("Scripting.Dictionary")
+    minDate = 0#
+
+    For rowIndex = headerRow + 1 To lastRow
+        dateValue = dataArr(rowIndex, 1)
+        dateOnly = 0#
+        If IsNumeric(dateValue) Then
+            dateOnly = Int(CDbl(dateValue))
+        ElseIf IsDate(dateValue) Then
+            dateOnly = Int(CDbl(CDate(dateValue)))
+        End If
+
+        If dateOnly <> 0# Then
+            dateKey = CStr(dateOnly)
+            If Not dictDates.Exists(dateKey) Then
+                dictDates.Add dateKey, True
+                If minDate = 0# Or dateOnly < minDate Then
+                    minDate = dateOnly
+                End If
+            End If
+        End If
+    Next rowIndex
+
     Set dictStart = CreateObject("Scripting.Dictionary")
+    Set dictInfo = CreateObject("Scripting.Dictionary")
 
     For rowIndex = headerRow + 1 To lastRow
         sesjaDobowa = ""
@@ -315,10 +346,10 @@ NextNightKey:
         End If
 
         startKey = CStr(dateOnly) & "|" & operatorValue
-        If operatorValue <> "" And dateOnly <> 0# Then
-            If Not dictStart.Exists(startKey) Then
-                If IsNumeric(dataArr(rowIndex, 2)) Then
-                    t = CDbl(dataArr(rowIndex, 2))
+        If operatorValue <> "" And dateOnly <> 0# And dateOnly = minDate Then
+            If IsNumeric(dataArr(rowIndex, 2)) Then
+                t = CDbl(dataArr(rowIndex, 2))
+                If Not dictStart.Exists(startKey) Then
                     If t <= maxNA Then
                         sesjaDobowa = "N-A"
                     ElseIf t > minR And t <= maxR Then
@@ -329,11 +360,26 @@ NextNightKey:
                         sesjaDobowa = "N-B"
                     End If
                     dictStart.Add startKey, True
+                    dictInfo.Add startKey, Array(sesjaDobowa, t, False)
+                Else
+                    infoArr = dictInfo(startKey)
+                    sesjaDobowa = CStr(infoArr(0))
+                    lastTime = CDbl(infoArr(1))
+                    switchedNB = CBool(infoArr(2))
+
+                    If Not switchedNB And (t - lastTime) > (8# / 24#) Then
+                        sesjaDobowa = "N-B"
+                        switchedNB = True
+                    End If
+
+                    infoArr(0) = sesjaDobowa
+                    infoArr(1) = t
+                    infoArr(2) = switchedNB
+                    dictInfo(startKey) = infoArr
                 End If
+                arrDobowa(rowIndex, 1) = sesjaDobowa
             End If
         End If
-
-        arrDobowa(rowIndex, 1) = sesjaDobowa
     Next rowIndex
 
     ' Krok 21: zapisujemy wyniki do nowych kolumn w arkuszu.
