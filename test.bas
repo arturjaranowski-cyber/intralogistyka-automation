@@ -350,6 +350,8 @@ NextNightKey:
         startKey = CStr(dateOnly) & "|" & operatorValue
         If operatorValue <> "" And dateOnly <> 0# And dateOnly = minDate Then
             If CStr(dataArr(rowIndex, 11)) = "S+" Then
+                Dim sameSeries As Boolean
+                sameSeries = False
                 If rowIndex > headerRow + 1 Then
                     prevDateOnly = 0#
                     prevDateValue = dataArr(rowIndex - 1, 1)
@@ -361,12 +363,16 @@ NextNightKey:
                     If CStr(dataArr(rowIndex - 1, 11)) = "S+" And _
                        Trim$(CStr(dataArr(rowIndex - 1, 4))) = operatorValue And _
                        prevDateOnly = dateOnly Then
-                        If dictInfo.Exists(startKey) Then
-                            infoArrDobowa = dictInfo(startKey)
-                            If CStr(infoArrDobowa(0)) = "N-B" Then
-                                arrDobowa(rowIndex, 1) = "N-B"
-                                GoTo NextDobowaRow
-                            End If
+                        sameSeries = True
+                    End If
+                End If
+
+                If Not sameSeries Then
+                    If dictInfo.Exists(startKey) Then
+                        infoArrDobowa = dictInfo(startKey)
+                        If CStr(infoArrDobowa(0)) = "N-B" Then
+                            arrDobowa(rowIndex, 1) = "N-B"
+                            GoTo NextDobowaRow
                         End If
                     End If
                 End If
