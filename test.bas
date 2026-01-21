@@ -418,4 +418,58 @@ NextDobowaRow:
     ' Krok 21: zapisujemy wyniki do nowych kolumn w arkuszu.
     ws.Cells(headerRow, col).Resize(lastRow, 1).Value = outputArr
     ws.Cells(headerRow, colDobowa).Resize(lastRow, 1).Value = arrDobowa
+
+    ' Krok 22: wstawiamy dodatkowy wiersz dla pierwszego N-A per operator.
+    Dim dictFirstNA As Object
+    Dim rowList() As Long
+    Dim listCount As Long
+    Dim idx As Long
+    Dim keyNA As Variant
+    Dim opNA As String
+    Dim tempRow As Long
+
+    Set dictFirstNA = CreateObject("Scripting.Dictionary")
+    listCount = 0
+
+    For rowIndex = headerRow + 1 To lastRow
+        If CStr(arrDobowa(rowIndex, 1)) = "N-A" Then
+            opNA = Trim$(CStr(dataArr(rowIndex, 4)))
+            If opNA <> "" Then
+                If Not dictFirstNA.Exists(opNA) Then
+                    dictFirstNA.Add opNA, rowIndex
+                    listCount = listCount + 1
+                    ReDim Preserve rowList(1 To listCount)
+                    rowList(listCount) = rowIndex
+                End If
+            End If
+        End If
+    Next rowIndex
+
+    If listCount > 1 Then
+        For rowIndex = 1 To listCount - 1
+            For idx = rowIndex + 1 To listCount
+                If rowList(rowIndex) < rowList(idx) Then
+                    tempRow = rowList(rowIndex)
+                    rowList(rowIndex) = rowList(idx)
+                    rowList(idx) = tempRow
+                End If
+            Next idx
+        Next rowIndex
+    End If
+
+    For idx = 1 To listCount
+        rowIndex = rowList(idx)
+        ws.Rows(rowIndex).Insert shift:=xlDown
+        ws.Rows(rowIndex + 1).Copy
+        ws.Rows(rowIndex).PasteSpecial Paste:=xlPasteValuesAndNumberFormats
+        ws.Cells(rowIndex, "B").Value = 0#
+        ws.Cells(rowIndex, "C").Value = 0
+        ws.Cells(rowIndex, "E").Value = "ZADANIE Z POPRZEDNIEJ DOBY"
+        ws.Cells(rowIndex, "F").Value = "KONTYNUACJA"
+        ws.Cells(rowIndex, "G").Value = "KONTYNUACJA"
+        ws.Cells(rowIndex, "H").Value = "Czynności inne"
+        ws.Cells(rowIndex, "K").Value = "S++"
+    Next idx
+
+    Application.CutCopyMode = False
 End Sub
