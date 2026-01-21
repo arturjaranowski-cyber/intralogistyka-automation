@@ -37,6 +37,8 @@ Public Sub test()
     Dim arrSkrot As Variant
     arrNazwa = ws.Range("E2:E" & lastRow).Value
     arrSkrot = ws.Range("F2:F" & lastRow).Value
+    Dim arrOper As Variant
+    arrOper = ws.Range("D2:D" & lastRow).Value
 
     ' Krok 7: przygotowujemy tablice wynikowe.
     Dim arrIlosc() As Variant
@@ -113,10 +115,23 @@ Public Sub test()
     Dim pA As Variant
     Dim sk As String
     Dim isMatch As Boolean
+    Dim nameVal As String
+    Dim opVal As String
+    Dim hasSk As Boolean
+    Dim hasLinked As Boolean
+    Dim prevSkLinked As Boolean
+    Dim prevOperator As String
 
     For i = 1 To UBound(arrSkrot, 1)
+        opVal = Trim$(CStr(arrOper(i, 1)))
+        If opVal <> prevOperator Then
+            prevSkLinked = False
+        End If
         sk = CStr(arrSkrot(i, 1))
+        nameVal = CStr(arrNazwa(i, 1))
         isMatch = False
+        hasSk = False
+        hasLinked = False
 
         If Len(sk) > 0 Then
             For Each pA In patternsA
@@ -128,10 +143,24 @@ Public Sub test()
         End If
 
         If isMatch Then
-            arrPozycje(i, 1) = sk
+            hasSk = InStr(1, sk, "[SKRZ.", vbTextCompare) > 0
+            hasLinked = InStr(1, nameVal, "WYDANIE ŁĄCZONE:", vbTextCompare) > 0
+
+            If hasSk And hasLinked Then
+                If prevSkLinked And opVal = prevOperator Then
+                    arrPozycje(i, 1) = ""
+                Else
+                    arrPozycje(i, 1) = "[SKRZ."
+                End If
+            Else
+                arrPozycje(i, 1) = sk
+            End If
         Else
             arrPozycje(i, 1) = ""
         End If
+
+        prevSkLinked = hasSk And hasLinked
+        prevOperator = opVal
     Next i
 
     ' Krok 10: zapisujemy wyniki do arkusza.
