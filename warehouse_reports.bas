@@ -11,9 +11,9 @@ Public Sub PrzetworzWielePlikowTekstowych()
 
     ' =========================================================
     ' START: Porządek arkuszy
-    ' - zostawiamy WerehouseReports
+    ' - zostawiamy WarehouseReports
     ' - kasujemy wszystkie inne arkusze
-    ' - tworzymy nowe "Dane" ZA WerehouseReports
+    ' - tworzymy nowe "Dane" ZA WarehouseReports
     ' =========================================================
 
     Dim wsWR As Worksheet
@@ -21,27 +21,27 @@ Public Sub PrzetworzWielePlikowTekstowych()
 
     Application.DisplayAlerts = False
 
-    ' Upewnij się, że istnieje WerehouseReports (jeśli nie ma – utwórz)
+    ' Upewnij się, że istnieje WarehouseReports (jeśli nie ma – utwórz)
     On Error Resume Next
-    Set wsWR = ThisWorkbook.Worksheets("WerehouseReports")
+    Set wsWR = ThisWorkbook.Worksheets("WarehouseReports")
     On Error GoTo 0
 
     If wsWR Is Nothing Then
         Set wsWR = ThisWorkbook.Worksheets.Add(Before:=ThisWorkbook.Sheets(1))
-        wsWR.Name = "WerehouseReports"
+        wsWR.Name = "WarehouseReports"
     End If
 
-    ' Usuń wszystkie arkusze poza WerehouseReports
+    ' Usuń wszystkie arkusze poza WarehouseReports
     Dim idx As Long
     For idx = ThisWorkbook.Worksheets.Count To 1 Step -1
-        If ThisWorkbook.Worksheets(idx).Name <> "WerehouseReports" Then
+        If ThisWorkbook.Worksheets(idx).Name <> "WarehouseReports" Then
             ThisWorkbook.Worksheets(idx).Delete
         End If
     Next idx
 
     Application.DisplayAlerts = True
 
-    ' Utwórz nowy arkusz "Dane" ZA WerehouseReports (zawsze nowy, czysty)
+    ' Utwórz nowy arkusz "Dane" ZA WarehouseReports (zawsze nowy, czysty)
     Set daneSheet = ThisWorkbook.Worksheets.Add(After:=wsWR)
     daneSheet.Name = "Dane"
     daneSheet.Cells.Clear
@@ -1582,7 +1582,7 @@ saveFileName = Application.GetSaveAsFilename( _
 If saveFileName = False Then
     MsgBox "Anulowanie zapisu" & vbNewLine & _
            "Arkusz musi być zapisany w osobnym pliku" & vbNewLine & _
-           "Jeszcze raz otwórz WerehouseReports.xlsm i ponów wczytywanie wydruku", _
+           "Jeszcze raz otwórz WarehouseReports.xlsm i ponów wczytywanie wydruku", _
            vbExclamation, "Uwaga"
     ThisWorkbook.Close
     Exit Sub
